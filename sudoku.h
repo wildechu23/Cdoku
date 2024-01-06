@@ -166,5 +166,5 @@ int solve_file(FILE* file) {
         solve_max_setup(input, solution);
         int found = solve_r(0, solution);
     }
-    // solve_cleanup();
+    solve_cleanup();
 }

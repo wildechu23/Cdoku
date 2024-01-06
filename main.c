@@ -23,4 +23,5 @@ int main() {
     //     solve(input,solution);
     // }
     solve_file(file);
+    fclose(file);
 }
