@@ -3,6 +3,7 @@
 #include "sudoku.h"
 
 void print_sudoku(char* solution) {
+    printf("Solution:\n");
     for(int row = 0; row < 9; row++) {
         char line[9];
         for(int col = 0; col < 9; col++) {
@@ -13,15 +14,13 @@ void print_sudoku(char* solution) {
 }
 
 int main() {
-    char input[81] = "5.....37....6..............7..54.....4......2...1..6...6..83........2.4...1......";
-    // char input[81] = "6..12.384..8459.72.....6..5...264.3..7..8...694...3...31.....5..897.....5.2...19.";
-    char solution[81];
-
-    solve_init(input, solution);
-    int found = solve(0, solution);
-    if(found == 1) {
-        print_sudoku(solution);
-    }
-
-    solve_cleanup();
+    FILE* file = fopen("input.txt", "r");
+    // char input[82];
+    // char solution[81];
+    // while(fgets(input, sizeof(input)+1, file)) {
+    //     // printf("%s\n", input);
+    //     // if(solve(input, solution) == 1) print_sudoku(solution);
+    //     solve(input,solution);
+    // }
+    solve_file(file);
 }

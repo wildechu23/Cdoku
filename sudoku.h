@@ -18,8 +18,7 @@ uint32_t boxes[9];
 int num_to_solve;
 RCB* cells_to_solve;
 
-// initialize variables
-void solve_init(const char* input, char* solution) {
+void solve_init(const char* input) {
     // fill rows
     for(int i = 0; i < 9; ++i) {
         rows[i] = ALL_BITS;
@@ -32,16 +31,15 @@ void solve_init(const char* input, char* solution) {
     for(int i = 0; i < 9; ++i) {
         boxes[i] = ALL_BITS;
     }
-
+    
     num_to_solve = 0;
     for(int i = 0; i < 81; ++i) {
         if(input[i] == '.') num_to_solve++;
     }
+}
 
-    // allocate
+void solve_clues(const char* input, char* solution) {
     memcpy(solution, input, 81);
-    cells_to_solve = (RCB*)malloc(sizeof(RCB)*num_to_solve);
-
     // for each input, check if blank or clue
     int i = 0;
     for(int row = 0; row < 9; ++row) {
@@ -70,6 +68,20 @@ void solve_init(const char* input, char* solution) {
     num_to_solve--;
 }
 
+void solve_exact_setup(const char* input, char* solution) {
+    solve_init(input);
+
+    cells_to_solve = (RCB*)malloc(sizeof(RCB)*num_to_solve);
+
+    solve_clues(input, solution);
+}
+
+void solve_max_setup(const char* input, char* solution) {
+    solve_init(input);
+    solve_clues(input, solution);
+}
+
+
 // count number of candidates
 int num_candidates(const RCB* rcb) {
     int candidates = rows[rcb->row] & cols[rcb->col] & boxes[rcb->box];
@@ -95,7 +107,7 @@ void sort_best_cell(int first) {
 }
 
 // solve the sudoku recursively
-int solve(int index, char* solution) {
+int solve_r(int index, char* solution) {
     sort_best_cell(index);
 
     // current cell and candidates
@@ -114,7 +126,7 @@ int solve(int index, char* solution) {
         rows[cell.row] ^= candidate;
         cols[cell.col] ^= candidate;
         boxes[cell.box] ^= candidate;
-        if (index == num_to_solve || solve(index + 1, solution)) {
+        if (index == num_to_solve || solve_r(index + 1, solution)) {
             solution[cell.row * 9 + cell.col] = (char)('0'+ __builtin_ffs(candidate));
             return 1;
         }
@@ -133,4 +145,26 @@ int solve(int index, char* solution) {
 // free memory
 void solve_cleanup() {
     free(cells_to_solve);
+}
+
+
+int solve(const char* input, char* solution) {
+    solve_exact_setup(input, solution);
+    int found = solve_r(0, solution);
+    solve_cleanup();
+    return found;
+}
+
+int solve_file(FILE* file) {
+    char input[82];
+    char solution[81];
+        
+    // max
+    cells_to_solve = (RCB*)malloc(sizeof(RCB)*81);
+    
+    while(fgets(input, sizeof(input)+1, file)) {
+        solve_max_setup(input, solution);
+        int found = solve_r(0, solution);
+    }
+    // solve_cleanup();
 }
